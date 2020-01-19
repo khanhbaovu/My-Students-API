@@ -18,14 +18,14 @@ type Student struct {
 
 func getStudents(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type","application/json")
-  db := driver.Connect("localhost", "5432", "postgres", "Vbk02122000", "postgres")
+
+  db := driver.Connect()
 
   err := db.SQL.Ping()
 
   if err != nil {
     panic(err)
   }
-
 
   results, err := db.SQL.Query("SELECT id, name, gpa FROM students")
     if err != nil {
@@ -48,7 +48,7 @@ func getStudents(w http.ResponseWriter, r *http.Request) {
 
 func getStudent(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type","application/json")
-  db := driver.Connect("localhost", "5432", "postgres", "Vbk02122000", "postgres")
+  db := driver.Connect()
 
   err := db.SQL.Ping()
 
@@ -72,7 +72,7 @@ func getStudent(w http.ResponseWriter, r *http.Request) {
 
 func addStudent(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type","application/json")
-  db := driver.Connect("localhost", "5432", "postgres", "Vbk02122000", "postgres")
+  db := driver.Connect()
 
   err := db.SQL.Ping()
 
@@ -85,7 +85,7 @@ func addStudent(w http.ResponseWriter, r *http.Request) {
 
 func updateStudent(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type","application/json")
-  db := driver.Connect("localhost", "5432", "postgres", "Vbk02122000", "postgres")
+  db := driver.Connect()
 
   err := db.SQL.Ping()
 
@@ -93,12 +93,27 @@ func updateStudent(w http.ResponseWriter, r *http.Request) {
     panic(err)
   }
 
+  vars := mux.Vars(r)
+
+  id := vars["id"]
+
+  newGPA := vars["gpa"]
+
+  updateStatement := `UPDATE students
+  SET gpa = $1
+  WHERE id = $2;`
+
+  _, err = db.SQL.Exec(updateStatement, newGPA, id)
+
+  if err != nil {
+    panic(err)
+  }
 
 }
 
 func deleteStudent(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type","application/json")
-  db := driver.Connect("localhost", "5432", "postgres", "Vbk02122000", "postgres")
+  db := driver.Connect()
 
   err := db.SQL.Ping()
 
@@ -114,7 +129,7 @@ func httpRequest() {
   r.HandleFunc("/students", getStudents).Methods("GET")
   r.HandleFunc("/student/{id}", getStudent).Methods("GET")
   r.HandleFunc("/newstudent", addStudent).Methods("POST")
-  r.HandleFunc("/fixedstudent/{id}", updateStudent).Methods("PUT")
+  r.HandleFunc("/fixedstudent/{id}/{gpa}", updateStudent).Methods("PUT")
   r.HandleFunc("/nonstudent/{id}", deleteStudent).Methods("DELETE")
 
   log.Fatal(http.ListenAndServe(":8080", r))
