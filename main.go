@@ -80,6 +80,18 @@ func addStudent(w http.ResponseWriter, r *http.Request) {
     panic(err)
   }
 
+  var newStudent Student
+
+  json.NewDecoder(r.Body).Decode(&newStudent)
+
+  insertStatement := "INSERT INTO students VALUES ($1, $2, $3);"
+
+  _, err = db.SQL.Exec(insertStatement, newStudent.ID, newStudent.Name, newStudent.GPA)
+
+  if err != nil {
+    panic(err)
+
+  }
 
 }
 
