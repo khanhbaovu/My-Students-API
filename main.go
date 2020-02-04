@@ -133,6 +133,18 @@ func deleteStudent(w http.ResponseWriter, r *http.Request) {
     panic(err)
   }
 
+  vars := mux.Vars(r)
+
+  id := vars["id"]
+
+  deleteStatement := "DELETE FROM students WHERE id = $1"
+
+    _, err = db.SQL.Exec(deleteStatement, id)
+
+    if err != nil {
+      panic(err)
+    }
+
 }
 
 func httpRequest() {
